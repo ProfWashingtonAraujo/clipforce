@@ -1,0 +1,56 @@
+[
+  {
+    "id": "summer-city",
+    "title": "Verão na cidade",
+    "status": "Draft",
+    "duration": "01:42",
+    "ratio": "9:16",
+    "updatedAt": "há 12 min",
+    "thumbnail": "https://images.unsplash.com/photo-1533929736458-ca588d08c8be?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "startup-playbook",
+    "title": "O manual das startups",
+    "status": "Processing",
+    "duration": "04:18",
+    "ratio": "16:9",
+    "updatedAt": "há 34 min",
+    "thumbnail": "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "morning-routine",
+    "title": "Minha rotina das 5 da manhã",
+    "status": "Exported",
+    "duration": "00:58",
+    "ratio": "9:16",
+    "updatedAt": "Ontem",
+    "thumbnail": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "design-tips",
+    "title": "7 dicas de design que funcionam",
+    "status": "Draft",
+    "duration": "02:06",
+    "ratio": "1:1",
+    "updatedAt": "há 2 dias",
+    "thumbnail": "https://images.unsplash.com/photo-1542744094-3a31f272c490?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "podcast-ep12",
+    "title": "Creator Lab Podcast #12",
+    "status": "Exported",
+    "duration": "12:34",
+    "ratio": "16:9",
+    "updatedAt": "há 4 dias",
+    "thumbnail": "https://images.unsplash.com/photo-1590602847861-f357a9332bbc?auto=format&fit=crop&w=900&q=80"
+  },
+  {
+    "id": "coffee-story",
+    "title": "A história do café perfeito",
+    "status": "Draft",
+    "duration": "01:24",
+    "ratio": "4:5",
+    "updatedAt": "Semana passada",
+    "thumbnail": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=80"
+  }
+]

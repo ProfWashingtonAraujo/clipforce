@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "Alex Morgan",
+    "email": "alex@northstar.studio",
+    "role": "Owner",
+    "status": "Active",
+    "initials": "AM",
+    "color": "#4D9FFF"
+  },
+  {
+    "id": 2,
+    "name": "Maya Chen",
+    "email": "maya@northstar.studio",
+    "role": "Editor",
+    "status": "Active",
+    "initials": "MC",
+    "color": "#A855F7"
+  },
+  {
+    "id": 3,
+    "name": "Leo Martins",
+    "email": "leo@northstar.studio",
+    "role": "Editor",
+    "status": "Active",
+    "initials": "LM",
+    "color": "#F59E0B"
+  },
+  {
+    "id": 4,
+    "name": "Sarah Kim",
+    "email": "sarah@northstar.studio",
+    "role": "Viewer",
+    "status": "Pending",
+    "initials": "SK",
+    "color": "#10B981"
+  }
+]
