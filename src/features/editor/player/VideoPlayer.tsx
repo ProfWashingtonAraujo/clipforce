@@ -7,7 +7,7 @@ import {
   Volume2,
 } from "lucide-react";
 import { memo, useEffect, useRef, useState } from "react";
-import { Dropdown, IconButton, Slider, Toggle } from "../../../components/ui";
+import { Dropdown, IconButton, Slider, Toggle, cn } from "../../../components/ui";
 import { useEditorStore } from "../../../store/editorStore";
 import { getYouTubeThumbnail } from "../../../lib/youtube";
 
@@ -18,6 +18,7 @@ export const VideoPlayer = memo(function VideoPlayer({ source, sourceUrl }: { so
   const currentTime = useEditorStore((s) => s.currentTime);
   const duration = useEditorStore((s) => s.duration);
   const isPlaying = useEditorStore((s) => s.isPlaying);
+  const ratio = useEditorStore((s) => s.ratio);
   const setPlaying = useEditorStore((s) => s.setPlaying);
   const setCurrentTime = useEditorStore((s) => s.setCurrentTime);
   const setDuration = useEditorStore((s) => s.setDuration);
@@ -64,16 +65,22 @@ export const VideoPlayer = memo(function VideoPlayer({ source, sourceUrl }: { so
     }
   }, [currentTime]);
 
+  const ratioClass = {
+    "9:16": "aspect-[9/16]",
+    "1:1": "aspect-square",
+    "4:5": "aspect-[4/5]",
+  }[ratio] || "aspect-video";
+
   return (
     <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-[#05070c] p-7">
-      <div className="relative aspect-video max-h-full w-full max-w-[900px] overflow-hidden rounded-lg bg-black shadow-2xl">
+      <div className={cn("relative max-h-full w-full max-w-[900px] overflow-hidden rounded-lg bg-black shadow-2xl transition-all duration-300", ratioClass)}>
         {source ? (
           <video
             ref={videoRef}
             src={source}
             playsInline
             preload="metadata"
-            className="h-full w-full object-contain"
+            className="h-full w-full object-cover"
             onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
             onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
             onEnded={() => setPlaying(false)}

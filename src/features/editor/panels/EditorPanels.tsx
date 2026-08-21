@@ -38,7 +38,7 @@ const Section = ({
 );
 
 function ReframePanel() {
-  const [ratio, setRatio] = useState("9:16");
+  const { ratio, setRatio } = useEditorStore();
   const [focus, setFocus] = useState("Detecção automática");
   const ratios = [
     { r: "9:16", name: "TikTok / Shorts", shape: "h-14 w-8" },

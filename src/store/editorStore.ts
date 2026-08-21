@@ -17,6 +17,7 @@ interface EditorState {
   subtitleStyle: SubtitleStyle;
   exportSettings: ExportSettings;
   exportProgress: number;
+  ratio: string;
   setCurrentTime: (time: number) => void;
   setDuration: (duration: number) => void;
   setPlaying: (playing: boolean) => void;
@@ -26,6 +27,7 @@ interface EditorState {
   setSubtitleStyle: (style: Partial<SubtitleStyle>) => void;
   setExportProgress: (progress: number) => void;
   resetExport: () => void;
+  setRatio: (ratio: string) => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -45,6 +47,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   },
   exportSettings: { resolution: "1080p", format: "MP4" },
   exportProgress: 0,
+  ratio: "9:16",
   setCurrentTime: (time) =>
     set((state) => ({
       currentTime: Math.min(state.duration, Math.max(0, time)),
@@ -63,4 +66,5 @@ export const useEditorStore = create<EditorState>((set) => ({
     set((state) => ({ subtitleStyle: { ...state.subtitleStyle, ...style } })),
   setExportProgress: (exportProgress) => set({ exportProgress }),
   resetExport: () => set({ exportProgress: 0 }),
+  setRatio: (ratio) => set({ ratio }),
 }));
