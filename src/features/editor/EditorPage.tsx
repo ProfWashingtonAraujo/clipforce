@@ -166,7 +166,7 @@ export function EditorPage() {
               {statusMessage}
             </div>
           )}
-          <VideoPlayer source={project?.mediaUrl ?? null} />
+          <VideoPlayer source={project?.mediaUrl ?? null} sourceUrl={project?.sourceUrl ?? null} />
           <Timeline />
         </main>
         <EditorPanels />

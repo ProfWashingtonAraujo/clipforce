@@ -13,7 +13,13 @@ import { useEditorStore } from "../../../store/editorStore";
 const formatTime = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
-export const VideoPlayer = memo(function VideoPlayer({ source }: { source: string | null }) {
+const getYoutubeThumbnail = (url: string | null | undefined) => {
+  if (!url) return null;
+  const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+  return match ? `https://img.youtube.com/vi/${match[1]}/maxresdefault.jpg` : null;
+};
+
+export const VideoPlayer = memo(function VideoPlayer({ source, sourceUrl }: { source: string | null, sourceUrl?: string | null }) {
   const currentTime = useEditorStore((s) => s.currentTime);
   const duration = useEditorStore((s) => s.duration);
   const isPlaying = useEditorStore((s) => s.isPlaying);
@@ -79,7 +85,7 @@ export const VideoPlayer = memo(function VideoPlayer({ source }: { source: strin
           />
         ) : (
           <img
-            src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1600&q=85"
+            src={getYoutubeThumbnail(sourceUrl) || "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1600&q=85"}
             className="h-full w-full object-cover opacity-75"
             alt="Prévia do vídeo"
           />
