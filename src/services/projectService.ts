@@ -115,6 +115,20 @@ export const projectService = {
     if (error) throw error;
   },
 
+  async rename(id: string, title: string) {
+    const normalizedTitle = title.trim();
+    if (!normalizedTitle) throw new Error("Informe um nome para o projeto.");
+
+    const { data, error } = await requireSupabase()
+      .from("projects")
+      .update({ title: normalizedTitle })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) throw error;
+    return await toProject(data);
+  },
+
   async duplicate(project: Project) {
     const copy = await this.create(`${project.title} - cópia`);
     const { data, error } = await requireSupabase()

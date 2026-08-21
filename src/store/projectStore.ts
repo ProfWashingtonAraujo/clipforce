@@ -9,6 +9,7 @@ interface ProjectState {
   fetchProjects: () => Promise<void>;
   refreshProject: (id: string) => Promise<void>;
   createProject: () => Promise<Project | null>;
+  renameProject: (id: string, title: string) => Promise<boolean>;
   deleteProject: (id: string) => Promise<void>;
   duplicateProject: (id: string) => Promise<void>;
   clear: () => void;
@@ -53,6 +54,21 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     } catch (error) {
       set({ error: errorMessage(error) });
       return null;
+    }
+  },
+  renameProject: async (id, title) => {
+    set({ error: null });
+    try {
+      const project = await projectService.rename(id, title);
+      set((state) => ({
+        projects: state.projects.map((item) =>
+          item.id === id ? project : item,
+        ),
+      }));
+      return true;
+    } catch (error) {
+      set({ error: errorMessage(error) });
+      return false;
     }
   },
   deleteProject: async (id) => {

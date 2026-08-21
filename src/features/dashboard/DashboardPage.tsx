@@ -1,4 +1,5 @@
 import {
+  Check,
   Copy,
   Edit3,
   Folder,
@@ -7,6 +8,7 @@ import {
   Plus,
   Search,
   Trash2,
+  X,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -32,12 +34,16 @@ export function DashboardPage() {
     error,
     fetchProjects,
     createProject,
+    renameProject,
     deleteProject,
     duplicateProject,
   } = useProjectStore();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [creating, setCreating] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [titleDraft, setTitleDraft] = useState("");
+  const [savingTitle, setSavingTitle] = useState(false);
   const visibleProjects = projects.filter((project) =>
     project.title
       .toLocaleLowerCase("pt-BR")
@@ -53,6 +59,21 @@ export function DashboardPage() {
     const project = await createProject();
     setCreating(false);
     if (project) navigate(`/editor/${project.id}`);
+  };
+  const startRenaming = (id: string, title: string) => {
+    setEditingId(id);
+    setTitleDraft(title);
+  };
+  const cancelRenaming = () => {
+    setEditingId(null);
+    setTitleDraft("");
+  };
+  const saveTitle = async () => {
+    if (!editingId || !titleDraft.trim() || savingTitle) return;
+    setSavingTitle(true);
+    const renamed = await renameProject(editingId, titleDraft);
+    setSavingTitle(false);
+    if (renamed) cancelRenaming();
   };
   return (
     <div className="mx-auto max-w-[1500px] p-8">
@@ -223,9 +244,27 @@ export function DashboardPage() {
                 <div className="p-4 pb-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h3 className="truncate text-sm font-semibold tracking-tight" title={project.title}>
-                        {project.title}
-                      </h3>
+                      {editingId === project.id ? (
+                        <input
+                          autoFocus
+                          value={titleDraft}
+                          onChange={(event) => setTitleDraft(event.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") void saveTitle();
+                            if (event.key === "Escape") cancelRenaming();
+                          }}
+                          maxLength={120}
+                          aria-label="Nome do projeto"
+                          className="h-8 w-full rounded-md border border-cyan/40 bg-midnight px-2 text-sm font-semibold outline-none shadow-glow"
+                        />
+                      ) : (
+                        <h3
+                          className="truncate text-sm font-semibold tracking-tight"
+                          title={project.title}
+                        >
+                          {project.title}
+                        </h3>
+                      )}
                       <div className="mt-2 flex items-center gap-2">
                         <span
                           className={cn(
@@ -245,28 +284,52 @@ export function DashboardPage() {
                       </div>
                     </div>
                     <div className="flex shrink-0">
-                      <IconButton
-                        title="Abrir editor"
-                        onClick={() => navigate(`/editor/${project.id}`)}
-                      >
-                        <Edit3 size={15} />
-                      </IconButton>
-                      <IconButton
-                        title="Duplicar"
-                        onClick={() => void duplicateProject(project.id)}
-                      >
-                        <Copy size={15} />
-                      </IconButton>
-                      <IconButton
-                        title="Excluir"
-                        onClick={() => {
-                          if (window.confirm(`Excluir “${project.title}”?`))
-                            void deleteProject(project.id);
-                        }}
-                        className="hover:bg-red-500/10 hover:text-red-300"
-                      >
-                        <Trash2 size={15} />
-                      </IconButton>
+                      {editingId === project.id ? (
+                        <>
+                          <IconButton
+                            title="Salvar nome"
+                            disabled={savingTitle || !titleDraft.trim()}
+                            onClick={() => void saveTitle()}
+                            className="text-cyan disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            <Check size={16} />
+                          </IconButton>
+                          <IconButton
+                            title="Cancelar"
+                            disabled={savingTitle}
+                            onClick={cancelRenaming}
+                          >
+                            <X size={16} />
+                          </IconButton>
+                        </>
+                      ) : (
+                        <>
+                          <IconButton
+                            title="Renomear"
+                            onClick={() =>
+                              startRenaming(project.id, project.title)
+                            }
+                          >
+                            <Edit3 size={15} />
+                          </IconButton>
+                          <IconButton
+                            title="Duplicar"
+                            onClick={() => void duplicateProject(project.id)}
+                          >
+                            <Copy size={15} />
+                          </IconButton>
+                          <IconButton
+                            title="Excluir"
+                            onClick={() => {
+                              if (window.confirm(`Excluir “${project.title}”?`))
+                                void deleteProject(project.id);
+                            }}
+                            className="hover:bg-red-500/10 hover:text-red-300"
+                          >
+                            <Trash2 size={15} />
+                          </IconButton>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
