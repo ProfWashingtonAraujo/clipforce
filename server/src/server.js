@@ -105,6 +105,8 @@ async function processVideo({ projectId, userId, url }) {
     await updateProject(projectId, userId, { import_status: "processing" });
     const args = [
       "--no-playlist",
+      "--js-runtimes",
+      "node",
       "--match-filter",
       `duration <= ${maxDuration}`,
       "--max-filesize",
