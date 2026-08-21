@@ -2,6 +2,7 @@ services:
   - type: web
     name: clipforge-media
     runtime: docker
+    plan: free
     rootDir: server
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
