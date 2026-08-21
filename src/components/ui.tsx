@@ -196,16 +196,17 @@ export function Toggle({
     >
       <span
         className={cn(
-          "relative h-5 w-9 rounded-full border transition-all duration-200",
+          "relative flex h-5 w-9 items-center rounded-full border px-[2px] transition-all duration-200",
           checked
-            ? "border-cyan bg-cyan/25 shadow-glow"
-            : "border-white/10 bg-white/10",
+            ? "justify-end border-cyan bg-cyan/25 shadow-glow"
+            : "justify-start border-white/10 bg-white/10",
         )}
       >
         <motion.span
-          animate={{ x: checked ? 17 : 2 }}
+          layout
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
           className={cn(
-            "absolute top-[2px] size-3.5 rounded-full",
+            "size-3.5 rounded-full",
             checked ? "bg-cyan" : "bg-textMuted",
           )}
         />

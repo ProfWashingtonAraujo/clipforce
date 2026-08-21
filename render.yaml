@@ -13,6 +13,8 @@ services:
         sync: false
       - key: ALLOWED_ORIGINS
         sync: false
+      - key: YTDLP_COOKIES_BASE64
+        sync: false
       - key: MAX_VIDEO_DURATION_SECONDS
         value: "7200"
       - key: MAX_VIDEO_SIZE_MB
