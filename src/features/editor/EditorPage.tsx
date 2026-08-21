@@ -169,7 +169,7 @@ export function EditorPage() {
           <VideoPlayer source={project?.mediaUrl ?? null} sourceUrl={project?.sourceUrl ?? null} />
           <Timeline />
         </main>
-        <EditorPanels />
+        <EditorPanels sourceUrl={project?.sourceUrl ?? null} />
       </div>
       <ExportModals open={exportOpen} onClose={() => setExportOpen(false)} />
     </div>

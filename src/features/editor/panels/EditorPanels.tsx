@@ -37,7 +37,9 @@ const Section = ({
   </div>
 );
 
-function ReframePanel() {
+import { getYouTubeThumbnail } from "../../../lib/youtube";
+
+function ReframePanel({ sourceUrl }: { sourceUrl: string | null }) {
   const { ratio, setRatio } = useEditorStore();
   const [focus, setFocus] = useState("Detecção automática");
   const ratios = [
@@ -45,6 +47,8 @@ function ReframePanel() {
     { r: "1:1", name: "Instagram", shape: "size-11" },
     { r: "4:5", name: "Feed social", shape: "h-12 w-10" },
   ];
+  const bgImage = getYouTubeThumbnail(sourceUrl) || "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=300&q=60";
+
   return (
     <>
       <Section title="Formato de destino">
@@ -93,9 +97,10 @@ function ReframePanel() {
           {ratios.map(({ r, shape }) => (
             <div
               key={r}
-              className="grid h-24 place-items-center overflow-hidden rounded-lg bg-[url('https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=300&q=60')] bg-cover"
+              className="grid h-24 place-items-center overflow-hidden rounded-lg bg-cover bg-center"
+              style={{ backgroundImage: `url('${bgImage}')` }}
             >
-              <div className={cn("border border-cyan shadow-glow", shape)} />
+              <div className={cn("border border-cyan shadow-glow bg-black/20 backdrop-blur-[2px]", shape)} />
             </div>
           ))}
         </div>
@@ -472,7 +477,7 @@ function SmartCutPanel() {
   );
 }
 
-export function EditorPanels() {
+export function EditorPanels({ sourceUrl }: { sourceUrl?: string | null }) {
   const panel = useEditorStore((s) => s.selectedPanel);
   const labels = {
     reframe: [
@@ -514,7 +519,7 @@ export function EditorPanels() {
         transition={{ duration: 0.2 }}
         className="min-h-0 flex-1 overflow-y-auto"
       >
-        {panel === "reframe" && <ReframePanel />}
+        {panel === "reframe" && <ReframePanel sourceUrl={sourceUrl ?? null} />}
         {panel === "subtitles" && <SubtitlesPanel />}
         {panel === "styles" && <StylesPanel />}
         {panel === "emojis" && <EmojisPanel />}
