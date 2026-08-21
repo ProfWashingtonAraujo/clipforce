@@ -9,15 +9,10 @@ import {
 import { memo, useEffect, useRef, useState } from "react";
 import { Dropdown, IconButton, Slider, Toggle } from "../../../components/ui";
 import { useEditorStore } from "../../../store/editorStore";
+import { getYouTubeThumbnail } from "../../../lib/youtube";
 
 const formatTime = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
-
-const getYoutubeThumbnail = (url: string | null | undefined) => {
-  if (!url) return null;
-  const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-  return match ? `https://img.youtube.com/vi/${match[1]}/maxresdefault.jpg` : null;
-};
 
 export const VideoPlayer = memo(function VideoPlayer({ source, sourceUrl }: { source: string | null, sourceUrl?: string | null }) {
   const currentTime = useEditorStore((s) => s.currentTime);
@@ -85,7 +80,13 @@ export const VideoPlayer = memo(function VideoPlayer({ source, sourceUrl }: { so
           />
         ) : (
           <img
-            src={getYoutubeThumbnail(sourceUrl) || "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1600&q=85"}
+            src={getYouTubeThumbnail(sourceUrl) || "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1600&q=85"}
+            onError={(event) => {
+              const fallback = getYouTubeThumbnail(sourceUrl, "hqdefault");
+              if (fallback && event.currentTarget.src !== fallback) {
+                event.currentTarget.src = fallback;
+              }
+            }}
             className="h-full w-full object-cover opacity-75"
             alt="Prévia do vídeo"
           />

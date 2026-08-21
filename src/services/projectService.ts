@@ -1,4 +1,5 @@
 import { requireSupabase } from "../lib/supabase";
+import { getYouTubeThumbnail } from "../lib/youtube";
 import type { Project } from "../types";
 import type { ProjectRow } from "../types/database";
 
@@ -36,7 +37,11 @@ async function toProject(row: ProjectRow): Promise<Project> {
     status: row.status,
     duration: row.duration,
     ratio: row.ratio,
-    thumbnail: thumbnailUrl || row.thumbnail || defaultThumbnail,
+    thumbnail:
+      getYouTubeThumbnail(row.source_url) ||
+      thumbnailUrl ||
+      row.thumbnail ||
+      defaultThumbnail,
     updatedAt: relativeDate(row.updated_at),
     mediaUrl,
     sourceUrl: row.source_url,
