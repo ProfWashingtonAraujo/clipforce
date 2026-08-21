@@ -463,7 +463,9 @@ function SmartCutPanel() {
         </Card>
         <Button onClick={() => setApplied(true)} className="mt-4 w-full">
           {applied ? <Check size={16} /> : <Sparkles size={16} />}{" "}
-          {applied ? "Cortes inteligentes aplicados" : "Aplicar cortes inteligentes"}
+          {applied
+            ? "Cortes inteligentes aplicados"
+            : "Aplicar cortes inteligentes"}
         </Button>
       </div>
     </>
@@ -473,10 +475,19 @@ function SmartCutPanel() {
 export function EditorPanels() {
   const panel = useEditorStore((s) => s.selectedPanel);
   const labels = {
-    reframe: ["Reenquadramento automático", "Adapte o vídeo para cada plataforma"],
+    reframe: [
+      "Reenquadramento automático",
+      "Adapte o vídeo para cada plataforma",
+    ],
     subtitles: ["Legendas com IA", "Edite e sincronize sua transcrição"],
-    styles: ["Estilos de legenda", "Deixe cada palavra com a cara da sua marca"],
-    emojis: ["Emojis inteligentes", "Adicione energia visual nos momentos certos"],
+    styles: [
+      "Estilos de legenda",
+      "Deixe cada palavra com a cara da sua marca",
+    ],
+    emojis: [
+      "Emojis inteligentes",
+      "Adicione energia visual nos momentos certos",
+    ],
     smartcut: ["Corte inteligente", "Remova as partes que ninguém assiste"],
   };
   return (

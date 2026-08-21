@@ -1,34 +1,81 @@
 import { create } from "zustand";
-import projectsData from "../mocks/projects.json";
+import { projectService } from "../services/projectService";
 import type { Project } from "../types";
 
 interface ProjectState {
   projects: Project[];
-  deleteProject: (id: string) => void;
-  duplicateProject: (id: string) => void;
+  loading: boolean;
+  error: string | null;
+  fetchProjects: () => Promise<void>;
+  refreshProject: (id: string) => Promise<void>;
+  createProject: () => Promise<Project | null>;
+  deleteProject: (id: string) => Promise<void>;
+  duplicateProject: (id: string) => Promise<void>;
+  clear: () => void;
 }
 
-export const useProjectStore = create<ProjectState>((set) => ({
-  projects: projectsData as Project[],
-  deleteProject: (id) =>
-    set((state) => ({
-      projects: state.projects.filter((project) => project.id !== id),
-    })),
-  duplicateProject: (id) =>
-    set((state) => {
-      const project = state.projects.find((item) => item.id === id);
-      if (!project) return state;
-      return {
-        projects: [
-          {
-            ...project,
-            id: `${id}-copy-${Date.now()}`,
-          title: `${project.title} - cópia`,
-            status: "Draft",
-          updatedAt: "Agora mesmo",
-          },
-          ...state.projects,
-        ],
-      };
-    }),
+const errorMessage = (error: unknown) =>
+  error instanceof Error
+    ? error.message
+    : "Não foi possível concluir a operação.";
+
+export const useProjectStore = create<ProjectState>((set, get) => ({
+  projects: [],
+  loading: false,
+  error: null,
+  fetchProjects: async () => {
+    set({ loading: true, error: null });
+    try {
+      set({ projects: await projectService.list(), loading: false });
+    } catch (error) {
+      set({ loading: false, error: errorMessage(error) });
+    }
+  },
+  refreshProject: async (id) => {
+    try {
+      const project = await projectService.get(id);
+      set((state) => ({
+        projects: state.projects.some((item) => item.id === id)
+          ? state.projects.map((item) => (item.id === id ? project : item))
+          : [project, ...state.projects],
+        error: null,
+      }));
+    } catch (error) {
+      set({ error: errorMessage(error) });
+    }
+  },
+  createProject: async () => {
+    set({ error: null });
+    try {
+      const project = await projectService.create();
+      set((state) => ({ projects: [project, ...state.projects] }));
+      return project;
+    } catch (error) {
+      set({ error: errorMessage(error) });
+      return null;
+    }
+  },
+  deleteProject: async (id) => {
+    set({ error: null });
+    try {
+      await projectService.remove(id);
+      set((state) => ({
+        projects: state.projects.filter((project) => project.id !== id),
+      }));
+    } catch (error) {
+      set({ error: errorMessage(error) });
+    }
+  },
+  duplicateProject: async (id) => {
+    const source = get().projects.find((project) => project.id === id);
+    if (!source) return;
+    set({ error: null });
+    try {
+      const project = await projectService.duplicate(source);
+      set((state) => ({ projects: [project, ...state.projects] }));
+    } catch (error) {
+      set({ error: errorMessage(error) });
+    }
+  },
+  clear: () => set({ projects: [], error: null, loading: false }),
 }));

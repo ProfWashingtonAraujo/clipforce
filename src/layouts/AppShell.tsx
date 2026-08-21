@@ -5,6 +5,7 @@ import {
   FileVideo2,
   FolderKanban,
   LayoutTemplate,
+  LogOut,
   Plus,
   Shapes,
   Users,
@@ -12,6 +13,8 @@ import {
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Button, IconButton, Logo, cn } from "../components/ui";
 import { useUIStore } from "../store/uiStore";
+import { useAuth } from "../features/auth/AuthProvider";
+import { useProjectStore } from "../store/projectStore";
 
 const links = [
   { to: "/dashboard", label: "Projetos", icon: FolderKanban },
@@ -22,7 +25,22 @@ const links = [
 
 export function AppShell() {
   const { sidebarCollapsed, toggleSidebar } = useUIStore();
+  const { user, signOut } = useAuth();
+  const createProject = useProjectStore((state) => state.createProject);
+  const clearProjects = useProjectStore((state) => state.clear);
   const navigate = useNavigate();
+  const displayName =
+    user?.user_metadata.full_name ?? user?.email?.split("@")[0] ?? "Criador";
+  const initials = displayName.slice(0, 2).toUpperCase();
+  const newProject = async () => {
+    const project = await createProject();
+    if (project) navigate(`/editor/${project.id}`);
+  };
+  const logout = async () => {
+    await signOut();
+    clearProjects();
+    navigate("/login", { replace: true });
+  };
   return (
     <div className="min-h-screen bg-midnight">
       <aside
@@ -46,7 +64,7 @@ export function AppShell() {
         )}
         <div className="px-3">
           <Button
-            onClick={() => navigate("/editor/new")}
+            onClick={() => void newProject()}
             className={cn("w-full", sidebarCollapsed && "px-0")}
           >
             <Plus size={17} />
@@ -96,16 +114,22 @@ export function AppShell() {
         <header className="sticky top-0 z-20 flex h-20 items-center justify-between border-b border-border bg-midnight/85 px-8 backdrop-blur-xl">
           <div>
             <p className="text-xs text-textMuted">Espaço de trabalho</p>
-            <p className="text-sm font-semibold">Northstar Studio</p>
+            <p className="text-sm font-semibold">{displayName}</p>
           </div>
           <div className="flex items-center gap-3">
             <IconButton>
               <Bell size={18} />
             </IconButton>
             <div className="h-7 w-px bg-white/10" />
-            <div className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-electric to-purple-500 text-xs font-bold">
-              AM
+            <div
+              className="grid size-9 place-items-center rounded-full bg-gradient-to-br from-electric to-purple-500 text-xs font-bold"
+              title={user?.email}
+            >
+              {initials}
             </div>
+            <IconButton title="Sair" onClick={() => void logout()}>
+              <LogOut size={17} />
+            </IconButton>
           </div>
         </header>
         <Outlet />

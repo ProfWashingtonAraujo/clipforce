@@ -128,7 +128,8 @@ export function LandingPage() {
             </Button>
           </motion.div>
           <p className="mt-4 text-[10px] text-textMuted">
-            Sem cartão de crédito · Plano grátis para sempre · Exporte em minutos
+            Sem cartão de crédito · Plano grátis para sempre · Exporte em
+            minutos
           </p>
           <motion.div
             initial={{ opacity: 0, y: 50, rotateX: 8 }}
@@ -166,7 +167,7 @@ export function LandingPage() {
                     <img
                       src="https://images.unsplash.com/photo-1492724441997-5dc865305da7?auto=format&fit=crop&w=1200&q=80"
                       className="h-full w-full object-cover opacity-75"
-                       alt="Editor do ClipForge"
+                      alt="Editor do ClipForge"
                     />
                     <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-xl font-black uppercase">
                       CRIE <span className="text-cyan">O QUE IMPORTA</span>
@@ -305,7 +306,9 @@ export function LandingPage() {
       >
         <div className="mx-auto max-w-6xl px-8 text-center">
           <p className="label text-cyan">Preços simples</p>
-          <h2 className="mt-4 text-4xl font-semibold">Crie mais. Pague menos.</h2>
+          <h2 className="mt-4 text-4xl font-semibold">
+            Crie mais. Pague menos.
+          </h2>
           <p className="mt-4 text-sm text-textMuted">
             Comece grátis. Mude de plano quando seu público crescer.
           </p>
@@ -327,7 +330,9 @@ export function LandingPage() {
                 <h3 className="font-semibold">{plan.name}</h3>
                 <p className="mt-2 text-xs text-textMuted">{plan.text}</p>
                 <p className="mt-7">
-                  <span className="text-4xl font-semibold">US$ {plan.price}</span>
+                  <span className="text-4xl font-semibold">
+                    US$ {plan.price}
+                  </span>
                   <span className="text-xs text-textMuted"> / mês</span>
                 </p>
                 <Button

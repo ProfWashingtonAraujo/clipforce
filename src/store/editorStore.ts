@@ -18,6 +18,7 @@ interface EditorState {
   exportSettings: ExportSettings;
   exportProgress: number;
   setCurrentTime: (time: number) => void;
+  setDuration: (duration: number) => void;
   setPlaying: (playing: boolean) => void;
   setTrimRange: (range: [number, number]) => void;
   setSelectedPanel: (panel: EditorPanel) => void;
@@ -48,6 +49,7 @@ export const useEditorStore = create<EditorState>((set) => ({
     set((state) => ({
       currentTime: Math.min(state.duration, Math.max(0, time)),
     })),
+  setDuration: (duration) => set({ duration, currentTime: 0, trimRange: [0, duration] }),
   setPlaying: (isPlaying) => set({ isPlaying }),
   setTrimRange: (trimRange) => set({ trimRange }),
   setSelectedPanel: (selectedPanel) => set({ selectedPanel }),

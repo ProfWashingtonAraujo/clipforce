@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: clipforge-media
+    runtime: docker
+    rootDir: server
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: MAX_VIDEO_DURATION_SECONDS
+        value: "7200"
+      - key: MAX_VIDEO_SIZE_MB
+        value: "500"
+      - key: MAX_CONCURRENT_JOBS
+        value: "2"

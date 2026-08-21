@@ -6,31 +6,33 @@ import {
   RotateCw,
   Volume2,
 } from "lucide-react";
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { Dropdown, IconButton, Slider, Toggle } from "../../../components/ui";
 import { useEditorStore } from "../../../store/editorStore";
 
 const formatTime = (seconds: number) =>
   `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
-export const VideoPlayer = memo(function VideoPlayer() {
+export const VideoPlayer = memo(function VideoPlayer({ source }: { source: string | null }) {
   const currentTime = useEditorStore((s) => s.currentTime);
   const duration = useEditorStore((s) => s.duration);
   const isPlaying = useEditorStore((s) => s.isPlaying);
   const setPlaying = useEditorStore((s) => s.setPlaying);
   const setCurrentTime = useEditorStore((s) => s.setCurrentTime);
+  const setDuration = useEditorStore((s) => s.setDuration);
   const subtitles = useEditorStore((s) => s.subtitles);
   const style = useEditorStore((s) => s.subtitleStyle);
   const [tracking, setTracking] = useState(true);
   const [mode, setMode] = useState("Dinâmico");
   const [sensitivity, setSensitivity] = useState(72);
   const [volume, setVolume] = useState(80);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const activeSubtitle = subtitles.find(
     (item) => currentTime >= item.start && currentTime < item.end,
   );
 
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || source) return;
     const timer = window.setInterval(() => {
       const state = useEditorStore.getState();
       if (state.currentTime >= state.duration) {
@@ -39,16 +41,49 @@ export const VideoPlayer = memo(function VideoPlayer() {
       } else state.setCurrentTime(state.currentTime + 0.1);
     }, 100);
     return () => window.clearInterval(timer);
-  }, [isPlaying]);
+  }, [isPlaying, source]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.volume = volume / 100;
+  }, [volume]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (isPlaying) void video.play().catch(() => setPlaying(false));
+    else video.pause();
+  }, [isPlaying, setPlaying]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video && Math.abs(video.currentTime - currentTime) > 0.35) {
+      video.currentTime = currentTime;
+    }
+  }, [currentTime]);
 
   return (
     <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-[#05070c] p-7">
       <div className="relative aspect-video max-h-full w-full max-w-[900px] overflow-hidden rounded-lg bg-black shadow-2xl">
-        <img
-          src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1600&q=85"
-          className="h-full w-full object-cover opacity-75"
-          alt="Prévia do vídeo"
-        />
+        {source ? (
+          <video
+            ref={videoRef}
+            src={source}
+            playsInline
+            preload="metadata"
+            className="h-full w-full object-contain"
+            onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
+            onTimeUpdate={(event) => setCurrentTime(event.currentTarget.currentTime)}
+            onEnded={() => setPlaying(false)}
+          />
+        ) : (
+          <img
+            src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1600&q=85"
+            className="h-full w-full object-cover opacity-75"
+            alt="Prévia do vídeo"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/25" />
         {tracking && (
           <div className="absolute left-[34%] top-[16%] h-[60%] w-[31%] border border-cyan shadow-glow">

@@ -11,7 +11,7 @@ import {
   Sparkles,
   Type,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button, IconButton, Logo, cn } from "../../components/ui";
 import { ExportModals } from "../export/ExportModals";
@@ -20,6 +20,8 @@ import type { EditorPanel } from "../../types";
 import { EditorPanels } from "./panels/EditorPanels";
 import { VideoPlayer } from "./player/VideoPlayer";
 import { Timeline } from "./timeline/Timeline";
+import { useProjectStore } from "../../store/projectStore";
+import { mediaService } from "../../services/mediaService";
 
 const panelTools: { panel: EditorPanel; label: string; icon: typeof Crop }[] = [
   { panel: "reframe", label: "Formatos", icon: Crop },
@@ -33,8 +35,52 @@ export function EditorPage() {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const { selectedPanel, setSelectedPanel } = useEditorStore();
-  const [url, setUrl] = useState("https://youtube.com/watch?v=creative-story");
+  const [url, setUrl] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState("");
   const [exportOpen, setExportOpen] = useState(false);
+  const projects = useProjectStore((state) => state.projects);
+  const fetchProjects = useProjectStore((state) => state.fetchProjects);
+  const refreshProject = useProjectStore((state) => state.refreshProject);
+  const project = projects.find((item) => item.id === projectId);
+
+  useEffect(() => {
+    if (!project && projects.length === 0) void fetchProjects();
+  }, [fetchProjects, project, projects.length]);
+
+  useEffect(() => {
+    if (!projectId || !["queued", "processing"].includes(project?.importStatus ?? "")) return;
+    const timer = window.setInterval(() => void refreshProject(projectId), 3000);
+    return () => window.clearInterval(timer);
+  }, [project?.importStatus, projectId, refreshProject]);
+
+  const importYoutube = async () => {
+    if (!projectId || !url.trim()) {
+      setImportError("Informe uma URL válida do YouTube.");
+      return;
+    }
+    setImporting(true);
+    setImportError("");
+    try {
+      await mediaService.importYoutube(projectId, url.trim());
+      await refreshProject(projectId);
+    } catch (error) {
+      setImportError(
+        error instanceof Error ? error.message : "Não foi possível iniciar a importação.",
+      );
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const processing = project?.importStatus === "queued" || project?.importStatus === "processing";
+  const statusMessage = processing
+    ? project.importStatus === "queued"
+      ? "Importação na fila..."
+      : "Baixando e preparando o vídeo..."
+    : project?.importStatus === "failed"
+      ? project.importError || "A importação falhou."
+      : importError;
   return (
     <div className="flex h-screen min-h-[700px] flex-col overflow-hidden bg-midnight">
       <header className="z-30 flex h-16 shrink-0 items-center border-b border-border bg-midnight-900 px-4">
@@ -45,7 +91,7 @@ export function EditorPage() {
         <Logo />
         <div className="ml-7">
           <p className="text-xs font-medium">
-            {projectId === "new" ? "Projeto sem título" : "Verão na cidade"}
+            {project?.title ?? "Carregando projeto..."}
           </p>
           <p className="mt-0.5 text-[9px] text-textMuted">
             Salvo agora · 1080 × 1920
@@ -56,10 +102,17 @@ export function EditorPage() {
           <input
             value={url}
             onChange={(e) => setUrl(e.target.value)}
+            placeholder="Cole uma URL do YouTube"
+            disabled={processing}
             className="min-w-0 flex-1 bg-transparent text-[11px] outline-none"
           />
-          <button className="text-[10px] font-semibold text-cyan">
-            Importar
+          <button
+            type="button"
+            onClick={() => void importYoutube()}
+            disabled={processing || importing}
+            className="text-[10px] font-semibold text-cyan disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {processing || importing ? "Processando" : "Importar"}
           </button>
         </div>
         <div className="flex items-center gap-2">
@@ -101,7 +154,19 @@ export function EditorPage() {
           </div>
         </aside>
         <main className="flex min-h-0 min-w-0 flex-col">
-          <VideoPlayer />
+          {statusMessage && (
+            <div
+              className={cn(
+                "border-b border-border px-4 py-2 text-center text-[11px]",
+                project?.importStatus === "failed" || importError
+                  ? "bg-red-500/10 text-red-300"
+                  : "bg-cyan/10 text-cyan",
+              )}
+            >
+              {statusMessage}
+            </div>
+          )}
+          <VideoPlayer source={project?.mediaUrl ?? null} />
           <Timeline />
         </main>
         <EditorPanels />

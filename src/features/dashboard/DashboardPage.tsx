@@ -8,6 +8,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { Button, Card, IconButton, cn } from "../../components/ui";
 import { useProjectStore } from "../../store/projectStore";
 
@@ -23,8 +24,34 @@ const statusLabel = {
 };
 
 export function DashboardPage() {
-  const { projects, deleteProject, duplicateProject } = useProjectStore();
+  const {
+    projects,
+    loading,
+    error,
+    fetchProjects,
+    createProject,
+    deleteProject,
+    duplicateProject,
+  } = useProjectStore();
   const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [creating, setCreating] = useState(false);
+  const visibleProjects = projects.filter((project) =>
+    project.title
+      .toLocaleLowerCase("pt-BR")
+      .includes(search.toLocaleLowerCase("pt-BR")),
+  );
+
+  useEffect(() => {
+    void fetchProjects();
+  }, [fetchProjects]);
+
+  const newProject = async () => {
+    setCreating(true);
+    const project = await createProject();
+    setCreating(false);
+    if (project) navigate(`/editor/${project.id}`);
+  };
   return (
     <div className="mx-auto max-w-[1500px] p-8">
       <div className="flex items-end justify-between">
@@ -40,10 +67,12 @@ export function DashboardPage() {
             <Search size={16} className="text-textMuted" />
             <input
               placeholder="Buscar projetos..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
               className="w-full bg-transparent text-sm outline-none placeholder:text-textMuted"
             />
           </div>
-          <Button onClick={() => navigate("/editor/new")}>
+          <Button onClick={newProject} loading={creating}>
             <Plus size={17} />
             Novo projeto
           </Button>
@@ -93,67 +122,117 @@ export function DashboardPage() {
             Última modificação <MoreHorizontal size={15} />
           </button>
         </div>
-        <div className="grid grid-cols-3 gap-5">
-          {projects.map((project) => (
-            <Card key={project.id} className="group overflow-hidden">
-              <div className="relative aspect-video overflow-hidden bg-midnight-700">
-                <img
-                  src={project.thumbnail}
-                  alt=""
-                  className="h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-100"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-midnight/80 to-transparent" />
-                <span className="absolute bottom-3 right-3 rounded bg-black/60 px-2 py-1 text-[10px]">
-                  {project.duration}
-                </span>
-                <span className="absolute left-3 top-3 rounded bg-black/60 px-2 py-1 text-[10px]">
-                  {project.ratio}
-                </span>
-                <div className="absolute inset-0 grid place-items-center opacity-0 transition group-hover:opacity-100">
-                  <Button onClick={() => navigate(`/editor/${project.id}`)}>
-                    <Edit3 size={15} />
-                    Abrir editor
-                  </Button>
+        {error && (
+          <div className="mb-5 rounded-xl border border-red-500/20 bg-red-500/[0.08] p-4 text-xs text-red-300">
+            {error}{" "}
+            <button
+              onClick={() => void fetchProjects()}
+              className="ml-2 font-semibold underline"
+            >
+              Tentar novamente
+            </button>
+          </div>
+        )}
+        {loading ? (
+          <div className="grid grid-cols-3 gap-5">
+            {[1, 2, 3, 4, 5, 6].map((item) => (
+              <div
+                key={item}
+                className="h-64 animate-pulse rounded-xl border border-border bg-white/[0.035]"
+              />
+            ))}
+          </div>
+        ) : visibleProjects.length === 0 ? (
+          <Card className="grid min-h-56 place-items-center border-dashed p-8 text-center">
+            <div>
+              <p className="font-semibold">
+                {search
+                  ? "Nenhum projeto encontrado"
+                  : "Seu primeiro projeto começa aqui"}
+              </p>
+              <p className="mt-2 text-xs text-textMuted">
+                {search
+                  ? "Tente buscar por outro título."
+                  : "Crie um projeto para importar e transformar seu primeiro vídeo."}
+              </p>
+              {!search && (
+                <Button
+                  onClick={newProject}
+                  loading={creating}
+                  className="mt-5"
+                >
+                  <Plus size={16} />
+                  Criar projeto
+                </Button>
+              )}
+            </div>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-3 gap-5">
+            {visibleProjects.map((project) => (
+              <Card key={project.id} className="group overflow-hidden">
+                <div className="relative aspect-video overflow-hidden bg-midnight-700">
+                  <img
+                    src={project.thumbnail}
+                    alt=""
+                    className="h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105 group-hover:opacity-100"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-midnight/80 to-transparent" />
+                  <span className="absolute bottom-3 right-3 rounded bg-black/60 px-2 py-1 text-[10px]">
+                    {project.duration}
+                  </span>
+                  <span className="absolute left-3 top-3 rounded bg-black/60 px-2 py-1 text-[10px]">
+                    {project.ratio}
+                  </span>
+                  <div className="absolute inset-0 grid place-items-center opacity-0 transition group-hover:opacity-100">
+                    <Button onClick={() => navigate(`/editor/${project.id}`)}>
+                      <Edit3 size={15} />
+                      Abrir editor
+                    </Button>
+                  </div>
                 </div>
-              </div>
-              <div className="p-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-sm font-semibold">{project.title}</h3>
-                    <div className="mt-2 flex items-center gap-2">
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-1 text-[10px] font-medium",
-                          statusStyle[project.status],
-                        )}
+                <div className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-sm font-semibold">{project.title}</h3>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span
+                          className={cn(
+                            "rounded-full px-2 py-1 text-[10px] font-medium",
+                            statusStyle[project.status],
+                          )}
+                        >
+                          {statusLabel[project.status]}
+                        </span>
+                        <span className="text-[11px] text-textMuted">
+                          {project.updatedAt}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex">
+                      <IconButton
+                        title="Duplicar"
+                        onClick={() => void duplicateProject(project.id)}
                       >
-                        {statusLabel[project.status]}
-                      </span>
-                      <span className="text-[11px] text-textMuted">
-                        {project.updatedAt}
-                      </span>
+                        <Copy size={15} />
+                      </IconButton>
+                      <IconButton
+                        title="Excluir"
+                        onClick={() => {
+                          if (window.confirm(`Excluir “${project.title}”?`))
+                            void deleteProject(project.id);
+                        }}
+                        className="hover:bg-red-500/10 hover:text-red-300"
+                      >
+                        <Trash2 size={15} />
+                      </IconButton>
                     </div>
                   </div>
-                  <div className="flex">
-                    <IconButton
-                      title="Duplicar"
-                      onClick={() => duplicateProject(project.id)}
-                    >
-                      <Copy size={15} />
-                    </IconButton>
-                    <IconButton
-                      title="Excluir"
-                      onClick={() => deleteProject(project.id)}
-                      className="hover:bg-red-500/10 hover:text-red-300"
-                    >
-                      <Trash2 size={15} />
-                    </IconButton>
-                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

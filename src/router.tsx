@@ -7,6 +7,7 @@ import { LoginPage } from "./features/auth/LoginPage";
 import { DashboardPage } from "./features/dashboard/DashboardPage";
 import { EditorPage } from "./features/editor/EditorPage";
 import { TeamPage } from "./features/team/TeamPage";
+import { ProtectedRoute } from "./features/auth/ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -18,11 +19,16 @@ export const router = createBrowserRouter([
     children: [{ path: "/login", element: <LoginPage /> }],
   },
   {
-    element: <AppShell />,
+    element: <ProtectedRoute />,
     children: [
-      { path: "/dashboard", element: <DashboardPage /> },
-      { path: "/team", element: <TeamPage /> },
+      {
+        element: <AppShell />,
+        children: [
+          { path: "/dashboard", element: <DashboardPage /> },
+          { path: "/team", element: <TeamPage /> },
+        ],
+      },
+      { path: "/editor/:projectId", element: <EditorPage /> },
     ],
   },
-  { path: "/editor/:projectId", element: <EditorPage /> },
 ]);

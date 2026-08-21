@@ -1,4 +1,5 @@
 export type ProjectStatus = "Draft" | "Processing" | "Exported";
+export type ImportStatus = "idle" | "queued" | "processing" | "ready" | "failed";
 export type EditorPanel =
   "reframe" | "subtitles" | "styles" | "emojis" | "smartcut";
 
@@ -10,6 +11,10 @@ export interface Project {
   ratio: string;
   updatedAt: string;
   thumbnail: string;
+  mediaUrl: string | null;
+  sourceUrl: string | null;
+  importStatus: ImportStatus;
+  importError: string | null;
 }
 
 export interface SubtitleSegment {
