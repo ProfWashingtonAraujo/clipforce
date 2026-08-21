@@ -28,6 +28,8 @@ interface EditorState {
   setExportProgress: (progress: number) => void;
   resetExport: () => void;
   setRatio: (ratio: string) => void;
+  emojis: { id: string; time: number; emoji: string }[];
+  addEmoji: (emoji: string) => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -48,6 +50,11 @@ export const useEditorStore = create<EditorState>((set) => ({
   exportSettings: { resolution: "1080p", format: "MP4" },
   exportProgress: 0,
   ratio: "9:16",
+  emojis: [
+    { id: "e1", time: 8, emoji: "🔥" },
+    { id: "e2", time: 21, emoji: "💡" },
+    { id: "e3", time: 31, emoji: "🚀" },
+  ],
   setCurrentTime: (time) =>
     set((state) => ({
       currentTime: Math.min(state.duration, Math.max(0, time)),
@@ -67,4 +74,11 @@ export const useEditorStore = create<EditorState>((set) => ({
   setExportProgress: (exportProgress) => set({ exportProgress }),
   resetExport: () => set({ exportProgress: 0 }),
   setRatio: (ratio) => set({ ratio }),
+  addEmoji: (emoji) =>
+    set((state) => ({
+      emojis: [
+        ...state.emojis,
+        { id: Math.random().toString(36).substr(2, 9), time: state.currentTime, emoji },
+      ],
+    })),
 }));

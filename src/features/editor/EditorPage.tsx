@@ -167,7 +167,7 @@ export function EditorPage() {
             </div>
           )}
           <VideoPlayer source={project?.mediaUrl ?? null} sourceUrl={project?.sourceUrl ?? null} />
-          <Timeline />
+          <Timeline sourceUrl={project?.sourceUrl ?? null} />
         </main>
         <EditorPanels sourceUrl={project?.sourceUrl ?? null} />
       </div>

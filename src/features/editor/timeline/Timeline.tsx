@@ -10,22 +10,12 @@ import {
   ZoomOut,
 } from "lucide-react";
 import { memo, useEffect, useRef, useState } from "react";
-import { IconButton, Slider } from "../../../components/ui";
+import { IconButton, Slider, cn } from "../../../components/ui";
 import { useEditorStore } from "../../../store/editorStore";
+import { getYouTubeThumbnail } from "../../../lib/youtube";
 
-const frames = [
-  "photo-1498050108023-c5249f4df085",
-  "photo-1556761175-b413da4baf72",
-  "photo-1542744173-8e7e53415bb0",
-  "photo-1497366754035-f200968a6e72",
-  "photo-1521737711867-e3b97375f902",
-  "photo-1497366811364-ccf3f5dc2c7",
-  "photo-1551434678-e076c223a692",
-  "photo-1497366216548-37526070297c",
-];
-
-export const Timeline = memo(function Timeline() {
-  const { currentTime, duration, trimRange, setCurrentTime, setTrimRange } =
+export const Timeline = memo(function Timeline({ sourceUrl }: { sourceUrl?: string | null }) {
+  const { currentTime, duration, trimRange, setCurrentTime, setTrimRange, emojis, subtitles } =
     useEditorStore();
   const trackRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<"start" | "end" | null>(null);
@@ -63,6 +53,9 @@ export const Timeline = memo(function Timeline() {
     const rect = trackRef.current.getBoundingClientRect();
     setCurrentTime(((event.clientX - rect.left) / rect.width) * duration);
   };
+  
+  const bgImage = getYouTubeThumbnail(sourceUrl) || "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=300&q=60";
+
   return (
     <div className="shrink-0 border-t border-border bg-midnight-900">
       <div className="flex h-11 items-center border-b border-border px-4">
@@ -136,10 +129,10 @@ export const Timeline = memo(function Timeline() {
               className="relative h-[72px] cursor-crosshair overflow-hidden rounded-md border border-white/10 bg-midnight-700"
             >
               <div className="absolute inset-0 flex">
-                {frames.map((frame, index) => (
+                {Array.from({ length: 8 }).map((_, index) => (
                   <img
-                    key={frame}
-                    src={`https://images.unsplash.com/${frame}?auto=format&fit=crop&w=200&q=60`}
+                    key={index}
+                    src={bgImage}
                     className="min-w-0 flex-1 object-cover opacity-60"
                     alt=""
                   />
@@ -171,17 +164,13 @@ export const Timeline = memo(function Timeline() {
                 style={{ left: `${(trimRange[1] / duration) * 100}%` }}
                 className="absolute inset-y-0 z-10 w-2 -translate-x-1/2 cursor-ew-resize rounded-r border-x-2 border-cyan bg-cyan/30 shadow-glow"
               />
-              {[
-                { t: 8, e: "🔥" },
-                { t: 21, e: "💡" },
-                { t: 31, e: "🚀" },
-              ].map(({ t, e }) => (
+              {emojis.map(({ time, emoji, id }) => (
                 <span
-                  key={t}
-                  style={{ left: `${(t / duration) * 100}%` }}
-                  className="absolute top-1 z-10 -translate-x-1/2 rounded bg-midnight px-1 text-sm"
+                  key={id}
+                  style={{ left: `${(time / duration) * 100}%` }}
+                  className="absolute top-1 z-10 -translate-x-1/2 rounded bg-midnight px-1 text-sm shadow-glow cursor-pointer"
                 >
-                  {e}
+                  {emoji}
                 </span>
               ))}
               <div
@@ -194,21 +183,26 @@ export const Timeline = memo(function Timeline() {
           </div>
           <div className="mt-2 grid grid-cols-[80px_1fr] gap-4">
             <div className="py-1 text-[10px] text-textMuted">LEGENDAS</div>
-            <div className="flex h-7 items-center gap-1 overflow-hidden rounded bg-cyan/[0.06] px-2">
-              {[
-                "E SE EU TE CONTAR",
-                "MELHOR CONTEÚDO",
-                "A IA ENCONTRA OS GANCHOS",
-                "CRIE MENOS",
-                "PUBLIQUE MAIS",
-              ].map((text) => (
-                <span
-                  key={text}
-                  className="rounded border border-cyan/20 bg-cyan/10 px-2 py-1 text-[8px] text-cyan"
-                >
-                  {text}
-                </span>
-              ))}
+            <div className="relative h-7 w-full overflow-hidden rounded bg-cyan/[0.06]">
+              {subtitles.map((segment) => {
+                const active = currentTime >= segment.start && currentTime < segment.end;
+                return (
+                  <span
+                    key={segment.id}
+                    onClick={() => setCurrentTime(segment.start)}
+                    style={{
+                      left: `${(segment.start / duration) * 100}%`,
+                      width: `${((segment.end - segment.start) / duration) * 100}%`
+                    }}
+                    className={cn(
+                      "absolute top-0 bottom-0 flex items-center cursor-pointer truncate rounded border px-2 py-1 text-[8px] transition-colors",
+                      active ? "border-cyan bg-cyan/20 text-cyan shadow-glow" : "border-cyan/20 bg-cyan/10 text-cyan/70 hover:border-cyan/50 hover:text-cyan"
+                    )}
+                  >
+                    {segment.text}
+                  </span>
+                )
+              })}
             </div>
           </div>
         </div>

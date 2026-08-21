@@ -321,6 +321,7 @@ function StylesPanel() {
 function EmojisPanel() {
   const [smart, setSmart] = useState(true);
   const [selected, setSelected] = useState("🔥");
+  const addEmoji = useEditorStore((s) => s.addEmoji);
   const suggestions = [
     ["incrível", "🔥"],
     ["ideia", "💡"],
@@ -364,7 +365,10 @@ function EmojisPanel() {
           ].map((emoji) => (
             <button
               key={emoji}
-              onClick={() => setSelected(emoji)}
+              onClick={() => {
+                setSelected(emoji);
+                addEmoji(emoji);
+              }}
               className={cn(
                 "interactive grid aspect-square place-items-center rounded-lg bg-white/[0.035] text-xl hover:bg-cyan/10",
                 selected === emoji && "ring-1 ring-cyan bg-cyan/10 shadow-glow",
@@ -379,7 +383,10 @@ function EmojisPanel() {
         <div className="space-y-2">
           {suggestions.map(([word, emoji]) => (
             <button
-              onClick={() => setSelected(emoji)}
+              onClick={() => {
+                setSelected(emoji);
+                addEmoji(emoji);
+              }}
               key={word}
               className="interactive flex w-full items-center justify-between rounded-lg border border-border bg-white/[0.02] p-3 text-xs hover:border-cyan/30"
             >
